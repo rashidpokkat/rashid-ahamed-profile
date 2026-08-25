@@ -7,9 +7,21 @@ include __DIR__ . '/includes/header.php';
         <div class="container hero-grid">
             <div class="avatar-wrap" data-reveal>
                 <div class="portrait">
+                    <div class="portrait-aurora" aria-hidden="true"></div>
+                    <div class="portrait-orbit" aria-hidden="true">
+                        <span class="orbit-ring"></span>
+                        <span class="orbit-ring orbit-ring-2"></span>
+                    </div>
+                    <ul class="portrait-floaters" aria-hidden="true">
+                        <li class="floater floater-1"><img src="assets/logos/skills/aws.svg" alt=""></li>
+                        <li class="floater floater-2"><img src="assets/logos/skills/docker.svg" alt=""></li>
+                        <li class="floater floater-3"><img src="assets/logos/skills/kubernetes.svg" alt=""></li>
+                    </ul>
                     <div class="portrait-back" aria-hidden="true"></div>
                     <figure class="portrait-main">
                         <img src="assets/images/avatar.jpg" alt="Portrait of Rashid Ahamed" width="420" height="520" fetchpriority="high">
+                        <span class="portrait-shine" aria-hidden="true"></span>
+                        <span class="portrait-scan" aria-hidden="true"></span>
                         <span class="portrait-brackets" aria-hidden="true"></span>
                         <figcaption class="portrait-plate">
                             <strong><?= e($config['short_name']) ?></strong>
