@@ -110,6 +110,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['login_attempts'] = $attempts;
             $error = 'Username or password is incorrect.';
         }
+    } elseif ($loggedIn && in_array((string) ($_POST['action'] ?? ''), ['message_read', 'message_unread', 'message_delete'], true)) {
+        require_once dirname(__DIR__) . '/includes/messages.php';
+        $messageId = trim((string) ($_POST['message_id'] ?? ''));
+        $ok = false;
+        if ($messageId !== '') {
+            $ok = match ((string) $_POST['action']) {
+                'message_read' => update_message($messageId, static function (array $row): array {
+                    $row['read'] = true;
+                    return $row;
+                }),
+                'message_unread' => update_message($messageId, static function (array $row): array {
+                    $row['read'] = false;
+                    return $row;
+                }),
+                'message_delete' => delete_message($messageId),
+                default => false,
+            };
+        }
+        $_SESSION['admin_flash'] = $ok
+            ? (((string) $_POST['action'] === 'message_delete') ? 'Message deleted.' : 'Inbox updated.')
+            : 'Could not update that message.';
+        header('Location: index.php#messages');
+        exit;
     } elseif ($loggedIn && ($_POST['action'] ?? '') === 'save') {
         $phone = trim((string) ($_POST['phone'] ?? ''));
         $digits = digits_only($phone);
@@ -220,13 +243,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'portrait' => 'portrait.jpg',
             'gallery_1' => 'gallery-1.jpg',
         ];
+        $removePhotos = (array) ($_POST['remove_photos'] ?? []);
         foreach ($photoMap as $key => $fallbackName) {
-            if (empty($_FILES[$key]) || !is_array($_FILES[$key])) {
-                continue;
+            $saved = null;
+            if (!empty($_FILES[$key]) && is_array($_FILES[$key])) {
+                $saved = store_upload($_FILES[$key], $fallbackName);
             }
-            $saved = store_upload($_FILES[$key], $fallbackName);
             if ($saved) {
                 $content['photos'][$key] = $saved;
+                continue;
+            }
+            if (!empty($removePhotos[$key])) {
+                $content['photos'][$key] = '';
             }
         }
 
@@ -248,7 +276,7 @@ foreach (($c['skills'] ?? []) as $group => $items) {
 
 function admin_photo(array $content, string $key): string
 {
-    $rel = (string) ($content['photos'][$key] ?? '');
+    $rel = content_photo($content, $key);
     if ($rel === '') {
         return '';
     }
@@ -261,4 +289,7 @@ $jobCount = count($c['experience'] ?? []);
 $skillCount = count($c['skills'] ?? []);
 $certCount = count($c['certifications'] ?? []);
 $adminUser = (string) ($_SESSION['admin_user'] ?? 'admin');
+require_once dirname(__DIR__) . '/includes/messages.php';
+$inbox = $loggedIn ? load_messages() : [];
+$unreadCount = unread_message_count($inbox);
 include __DIR__ . '/view.php';

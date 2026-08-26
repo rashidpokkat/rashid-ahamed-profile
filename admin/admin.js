@@ -141,12 +141,18 @@
     document.querySelectorAll(".photo-tile input[type='file']").forEach((input) => {
         input.addEventListener("change", () => {
             const file = input.files?.[0];
-            const frame = input.closest(".photo-tile")?.querySelector(".photo-frame");
+            const tile = input.closest(".photo-tile");
+            const frame = tile?.querySelector(".photo-frame");
+            const remove = tile?.querySelector(".photo-remove input");
+            if (remove) {
+                remove.checked = false;
+            }
             if (!file || !frame) {
                 return;
             }
             const url = URL.createObjectURL(file);
             frame.innerHTML = `<img src="${url}" alt="New photo preview">`;
+            tile?.classList.remove("is-empty");
         });
     });
 

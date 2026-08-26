@@ -38,6 +38,11 @@ function load_content(): array
     return require __DIR__ . '/content.default.php';
 }
 
+function content_photo(array $content, string $key): string
+{
+    return trim((string) ($content['photos'][$key] ?? ''));
+}
+
 function save_content(array $content): bool
 {
     $dir = dirname(content_path());

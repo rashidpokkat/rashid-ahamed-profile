@@ -1,5 +1,6 @@
 <?php
 require __DIR__ . '/includes/init.php';
+require_once __DIR__ . '/includes/messages.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -18,6 +19,13 @@ if (!hash_equals($_SESSION['csrf_token'] ?? '', (string) $csrf)) {
 
 if (!empty($_POST['website'])) {
     echo json_encode(['ok' => true, 'message' => 'Thanks, I will get back to you shortly.']);
+    exit;
+}
+
+$attempts = array_values(array_filter($_SESSION['contact_attempts'] ?? [], static fn ($t) => $t > time() - 900));
+if (count($attempts) >= 8) {
+    http_response_code(429);
+    echo json_encode(['ok' => false, 'message' => 'Too many messages. Please wait a few minutes and try again.']);
     exit;
 }
 
@@ -44,26 +52,27 @@ if ($message === '' || $len($message) < 8 || $len($message) > 2000) {
     exit;
 }
 
-$to = $config['email'];
-$subject = 'Portfolio message from ' . $name;
-$body = "Name: {$name}\nEmail: {$email}\n\n{$message}\n";
-$headers = [
-    'From: ' . $to,
-    'Reply-To: ' . $email,
-    'Content-Type: text/plain; charset=UTF-8',
-    'X-Mailer: PHP/' . PHP_VERSION,
-];
+$attempts[] = time();
+$_SESSION['contact_attempts'] = $attempts;
 
-$sent = @mail($to, $subject, $body, implode("\r\n", $headers));
+$stored = add_contact_message($name, $email, $message);
 
-if ($sent) {
+$to = (string) ($config['email'] ?? '');
+if ($to !== '' && filter_var($to, FILTER_VALIDATE_EMAIL)) {
+    $subject = 'Portfolio message from ' . $name;
+    $body = "Name: {$name}\nEmail: {$email}\n\n{$message}\n";
+    $headers = [
+        'From: ' . $to,
+        'Reply-To: ' . $email,
+        'Content-Type: text/plain; charset=UTF-8',
+        'X-Mailer: PHP/' . PHP_VERSION,
+    ];
+    @mail($to, $subject, $body, implode("\r\n", $headers));
+}
+
+if ($stored) {
     echo json_encode(['ok' => true, 'message' => 'Message sent. I will reply as soon as I can.']);
     exit;
 }
 
-echo json_encode([
-    'ok' => false,
-    'fallback' => true,
-    'message' => 'The mail server is not available here. Opening your email app instead.',
-    'mailto' => 'mailto:' . $to . '?subject=' . rawurlencode($subject) . '&body=' . rawurlencode($body),
-]);
+echo json_encode(['ok' => false, 'message' => 'Could not send. Please use email or WhatsApp.']);

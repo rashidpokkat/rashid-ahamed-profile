@@ -1,0 +1,16 @@
+{
+  "name": "Rashid Ahamed",
+  "short_name": "Rashid",
+  "display": "standalone",
+  "background_color": "#0d0e12",
+  "theme_color": "#0d0e12",
+  "start_url": "./",
+  "icons": [
+    {
+      "src": "assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

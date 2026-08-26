@@ -6,3 +6,4 @@ Thumbs.db
 .pydeps/
 data/admin.json
 data/github-cache.json
+data/messages.json

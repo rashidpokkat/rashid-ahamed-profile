@@ -9,6 +9,8 @@
 /** @var int $skillCount */
 /** @var int $certCount */
 /** @var string $adminUser */
+/** @var array $inbox */
+/** @var int $unreadCount */
 
 $focusIcons = [
     'cloud' => 'Cloud',
@@ -113,6 +115,7 @@ $socialFields = [
             </a>
             <nav aria-label="Sections">
                 <a href="#overview" class="is-active"><?= icon('home') ?> Overview</a>
+                <a href="#messages"><?= icon('chat') ?> Messages<?php if ($unreadCount > 0): ?> <span class="nav-badge"><?= (int) $unreadCount ?></span><?php endif; ?></a>
                 <a href="#profile"><?= icon('user') ?> Profile</a>
                 <a href="#social"><?= icon('link') ?> Social</a>
                 <a href="#photos"><?= icon('image') ?> Photos</a>
@@ -140,9 +143,7 @@ $socialFields = [
                 </div>
             </header>
 
-            <form class="wrap" id="content-form" method="post" enctype="multipart/form-data">
-                <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
-                <input type="hidden" name="action" value="save">
+            <div class="wrap">
                 <?php if ($notice): ?><p class="flash ok"><?= icon('check') ?><span><?= e($notice) ?></span></p><?php endif; ?>
                 <?php if ($error): ?><p class="flash err"><?= icon('chat') ?><span><?= e($error) ?></span></p><?php endif; ?>
 
@@ -155,9 +156,75 @@ $socialFields = [
                     <div class="overview-chips">
                         <article class="stat-chip"><strong><?= $jobCount ?></strong><span>Experience roles</span></article>
                         <article class="stat-chip"><strong><?= $skillCount ?></strong><span>Skill groups</span></article>
-                        <article class="stat-chip"><strong><?= $certCount ?></strong><span>Certifications</span></article>
+                        <article class="stat-chip"><strong><?= count($inbox) ?></strong><span><?= $unreadCount > 0 ? $unreadCount . ' unread' : 'Messages' ?></span></article>
                     </div>
                 </section>
+
+                <section class="section inbox-section" id="messages">
+                    <div class="section-head">
+                        <div class="section-copy">
+                            <p class="kicker">Inbox</p>
+                            <h2>Messages</h2>
+                            <p>Contact-form submissions are private. Only you can see who wrote in.</p>
+                        </div>
+                    </div>
+                    <?php if ($inbox === []): ?>
+                        <article class="inbox-empty">
+                            <p>No messages yet. When someone uses the public contact form, it will appear here.</p>
+                        </article>
+                    <?php else: ?>
+                        <div class="inbox-list">
+                            <?php foreach ($inbox as $note): ?>
+                                <?php
+                                    $noteId = (string) ($note['id'] ?? '');
+                                    $noteName = (string) ($note['name'] ?? 'Visitor');
+                                    $noteEmail = (string) ($note['email'] ?? '');
+                                    $noteBody = (string) ($note['message'] ?? '');
+                                    $noteWhen = (string) ($note['created_at'] ?? '');
+                                    $noteIp = (string) ($note['ip'] ?? '');
+                                    $stamp = $noteWhen !== '' ? strtotime($noteWhen) : false;
+                                    $noteLabel = $stamp ? date('j M Y · g:ia', $stamp) : $noteWhen;
+                                    $isRead = !empty($note['read']);
+                                ?>
+                                <article class="inbox-card<?= $isRead ? ' is-read' : '' ?>">
+                                    <div class="inbox-top">
+                                        <div>
+                                            <strong><?= e($noteName) ?></strong>
+                                            <?php if ($noteEmail !== ''): ?>
+                                                <a href="mailto:<?= e($noteEmail) ?>"><?= e($noteEmail) ?></a>
+                                            <?php endif; ?>
+                                            <p class="muted"><?= e($noteLabel) ?><?php if ($noteIp !== ''): ?> · <?= e($noteIp) ?><?php endif; ?></p>
+                                        </div>
+                                        <?php if (!$isRead): ?><span class="inbox-pill">New</span><?php endif; ?>
+                                    </div>
+                                    <p class="inbox-body"><?= nl2br(e($noteBody)) ?></p>
+                                    <div class="inbox-actions">
+                                        <?php if ($noteEmail !== ''): ?>
+                                            <a class="btn btn-ghost btn-sm" href="mailto:<?= e($noteEmail) ?>?subject=<?= rawurlencode('Re: your message') ?>"><?= icon('mail') ?> Reply</a>
+                                        <?php endif; ?>
+                                        <form method="post">
+                                            <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
+                                            <input type="hidden" name="message_id" value="<?= e($noteId) ?>">
+                                            <input type="hidden" name="action" value="<?= $isRead ? 'message_unread' : 'message_read' ?>">
+                                            <button class="btn btn-ghost btn-sm" type="submit"><?= $isRead ? 'Mark unread' : 'Mark read' ?></button>
+                                        </form>
+                                        <form method="post" onsubmit="return confirm('Delete this message?');">
+                                            <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
+                                            <input type="hidden" name="message_id" value="<?= e($noteId) ?>">
+                                            <input type="hidden" name="action" value="message_delete">
+                                            <button class="btn btn-danger btn-sm" type="submit"><?= icon('trash') ?> Delete</button>
+                                        </form>
+                                    </div>
+                                </article>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </section>
+            </div>
+
+            <form class="wrap" id="content-form" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
+                <input type="hidden" name="action" value="save">
 
                 <section class="section" id="profile">
                     <div class="section-head">
@@ -204,7 +271,7 @@ $socialFields = [
                         <div class="section-copy">
                             <p class="kicker">Media</p>
                             <h2>Photos</h2>
-                            <p>Upload profile and portrait separately. JPEG, PNG, or WebP. Max 3.5 MB each. Leave a field empty to keep the current image.</p>
+                            <p>Upload profile and portrait separately. JPEG, PNG, or WebP. Max 3.5 MB each. Leave a field empty to keep the current image. Check Remove and save to hide a photo on the public site.</p>
                         </div>
                     </div>
                     <?php foreach ($photoGroups as $groupTitle => $fields): ?>
@@ -213,7 +280,7 @@ $socialFields = [
                             <div class="photo-grid<?= count($fields) > 2 ? ' cols-3' : '' ?>">
                                 <?php foreach ($fields as $key => [$title, $help]): ?>
                                     <?php $src = admin_photo($c, $key); ?>
-                                    <label class="photo-tile">
+                                    <article class="photo-tile<?= $src ? '' : ' is-empty' ?>">
                                         <div class="photo-frame">
                                             <?php if ($src): ?>
                                                 <img src="<?= e($src) ?>" alt="<?= e($title) ?>">
@@ -224,7 +291,14 @@ $socialFields = [
                                         <strong><?= e($title) ?></strong>
                                         <span><?= e($help) ?></span>
                                         <input type="file" name="<?= e($key) ?>" accept="image/jpeg,image/png,image/webp">
-                                    </label>
+                                        <?php if ($src): ?>
+                                            <label class="toggle photo-remove">
+                                                <input type="checkbox" name="remove_photos[<?= e($key) ?>]" value="1">
+                                                <span class="toggle-ui"></span>
+                                                <span>Remove from site</span>
+                                            </label>
+                                        <?php endif; ?>
+                                    </article>
                                 <?php endforeach; ?>
                             </div>
                         </div>

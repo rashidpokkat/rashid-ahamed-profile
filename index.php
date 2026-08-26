@@ -6,11 +6,20 @@ $githubUrl = (string) ($config['social']['github'] ?? '');
 $github = $githubUrl !== '' ? load_github_profile(github_username_from_url($githubUrl)) : null;
 
 include __DIR__ . '/includes/header.php';
+
+$avatar = content_photo($config, 'avatar');
+$peek = content_photo($config, 'peek');
+$gallery = array_values(array_filter([
+    ['src' => content_photo($config, 'about'), 'alt' => 'Rashid Ahamed looking left, wearing a black mandarin-collar shirt with wavy light embroidery'],
+    ['src' => content_photo($config, 'portrait'), 'alt' => 'Rashid Ahamed in profile wearing sunglasses and a black t-shirt'],
+    ['src' => content_photo($config, 'gallery_1'), 'alt' => 'Rashid Ahamed looking at the camera in a taupe open-collar shirt'],
+], static fn (array $photo): bool => $photo['src'] !== ''));
 ?>
 <main id="main">
     <section class="hero" id="about">
         <div class="container hero-grid">
             <div class="avatar-wrap" data-reveal>
+                <?php if ($avatar !== ''): ?>
                 <div class="portrait">
                     <div class="portrait-aurora" aria-hidden="true"></div>
                     <div class="portrait-orbit" aria-hidden="true">
@@ -24,7 +33,7 @@ include __DIR__ . '/includes/header.php';
                     </ul>
                     <div class="portrait-back" aria-hidden="true"></div>
                     <figure class="portrait-main">
-                        <img src="<?= e($config['photos']['avatar'] ?? 'assets/images/avatar.jpg') ?>" alt="Professional headshot of Rashid Ahamed looking at the camera, wearing a taupe open-collar shirt" width="420" height="520" fetchpriority="high">
+                        <img src="<?= e($avatar) ?>" alt="Professional headshot of Rashid Ahamed looking at the camera, wearing a taupe open-collar shirt" width="420" height="520" fetchpriority="high">
                         <span class="portrait-shine" aria-hidden="true"></span>
                         <span class="portrait-scan" aria-hidden="true"></span>
                         <span class="portrait-brackets" aria-hidden="true"></span>
@@ -33,11 +42,14 @@ include __DIR__ . '/includes/header.php';
                             <span><?= e($config['location']) ?></span>
                         </figcaption>
                     </figure>
+                    <?php if ($peek !== ''): ?>
                     <figure class="portrait-peek">
-                        <img src="<?= e($config['photos']['peek'] ?? 'assets/images/peek.jpg') ?>" alt="Rashid Ahamed looking left, wearing a black mandarin-collar shirt with wavy embroidery" width="220" height="280">
+                        <img src="<?= e($peek) ?>" alt="Rashid Ahamed looking left, wearing a black mandarin-collar shirt with wavy embroidery" width="220" height="280">
                     </figure>
+                    <?php endif; ?>
                     <span class="portrait-chip">operator / 01</span>
                 </div>
+                <?php endif; ?>
                 <div class="meta-pills">
                     <span><i class="pulse"></i> available</span>
                     <span>tz <?= e($config['timezone']) ?></span>
@@ -188,25 +200,23 @@ include __DIR__ . '/includes/header.php';
         </div>
     </section>
 
+    <?php if ($gallery !== []): ?>
     <section class="section" id="photos">
         <div class="container">
             <div class="section-head">
                 <p class="kicker" data-reveal>Beyond the terminal</p>
                 <h2 data-reveal>A few portraits</h2>
             </div>
-            <div class="photo-grid">
+            <div class="photo-grid count-<?= count($gallery) ?>">
+                <?php foreach ($gallery as $photo): ?>
                 <figure data-reveal>
-                    <img src="<?= e($config['photos']['about'] ?? 'assets/images/about.jpg') ?>" alt="Rashid Ahamed looking left, wearing a black mandarin-collar shirt with wavy light embroidery" width="800" height="1100" loading="lazy">
+                    <img src="<?= e($photo['src']) ?>" alt="<?= e($photo['alt']) ?>" width="800" height="1100" loading="lazy">
                 </figure>
-                <figure data-reveal>
-                    <img src="<?= e($config['photos']['portrait'] ?? 'assets/images/portrait.jpg') ?>" alt="Rashid Ahamed in profile wearing sunglasses and a black t-shirt" width="720" height="960" loading="lazy">
-                </figure>
-                <figure data-reveal>
-                    <img src="<?= e($config['photos']['gallery_1'] ?? 'assets/images/gallery-1.jpg') ?>" alt="Rashid Ahamed looking at the camera in a taupe open-collar shirt" width="720" height="960" loading="lazy">
-                </figure>
+                <?php endforeach; ?>
             </div>
         </div>
     </section>
+    <?php endif; ?>
 
     <section class="section" id="github">
         <div class="container">

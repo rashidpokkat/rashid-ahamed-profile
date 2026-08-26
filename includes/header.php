@@ -2,7 +2,7 @@
 /** @var array $config */
 $pageTitle = $pageTitle ?? ($config['name'] . ' — ' . $config['title']);
 $pageDescription = $pageDescription ?? $config['tagline'];
-$ogImage = $ogImage ?? ($config['photos']['avatar'] ?? 'assets/images/avatar.jpg');
+$ogImage = $ogImage ?? content_photo($config, 'avatar');
 $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')
     . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost')
     . rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/\\');
@@ -17,11 +17,20 @@ $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : '
     <meta name="author" content="<?= e($config['name']) ?>">
     <meta name="color-scheme" content="dark light">
     <meta name="theme-color" content="#0d0e12">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="<?= e($config['short_name'] ?? 'Profile') ?>">
+    <link rel="manifest" href="manifest.webmanifest">
     <meta property="og:title" content="<?= e($pageTitle) ?>">
     <meta property="og:description" content="<?= e($pageDescription) ?>">
     <meta property="og:type" content="website">
+    <?php if ($ogImage !== ''): ?>
     <meta property="og:image" content="<?= e($baseUrl . '/' . $ogImage) ?>">
     <meta name="twitter:card" content="summary_large_image">
+    <?php else: ?>
+    <meta name="twitter:card" content="summary">
+    <?php endif; ?>
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

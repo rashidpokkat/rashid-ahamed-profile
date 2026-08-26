@@ -41,7 +41,8 @@
     }
 
     const spy = () => {
-        const y = window.scrollY + 140;
+        const offset = window.matchMedia("(max-width: 760px)").matches ? 88 : 140;
+        const y = window.scrollY + offset;
         let current = "about";
         sections.forEach((section) => {
             if (section.offsetTop <= y) {
