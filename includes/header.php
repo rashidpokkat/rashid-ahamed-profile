@@ -68,7 +68,7 @@ $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : '
                 <span class="logo-mark"><?= e($config['initials']) ?></span>
                 <span class="logo-copy">
                     <strong><?= e($config['short_name']) ?></strong>
-                    <span class="role-rotate" id="role-rotate"><?= e($config['roles'][0]) ?></span>
+                    <span class="role-rotate" id="role-rotate"><?= e($config['roles'][0] ?? 'DevOps Engineer') ?></span>
                 </span>
             </a>
             <nav class="site-nav" id="site-nav" aria-label="Primary">

@@ -141,6 +141,78 @@
         {
             "name": "Red Hat",
             "file": "skills/redhat.svg"
+        },
+        {
+            "name": "Hugging Face",
+            "file": "skills/huggingface.svg"
+        },
+        {
+            "name": "Kibana",
+            "file": "skills/kibana.svg"
+        },
+        {
+            "name": "Elasticsearch",
+            "file": "skills/elasticsearch.svg"
+        },
+        {
+            "name": "MongoDB",
+            "file": "skills/mongodb.svg"
+        },
+        {
+            "name": "PostgreSQL",
+            "file": "skills/postgresql.svg"
+        },
+        {
+            "name": "Debezium",
+            "file": "skills/debezium.svg"
+        },
+        {
+            "name": "Kafka",
+            "file": "skills/kafka.svg"
+        },
+        {
+            "name": "Azure DevOps",
+            "file": "skills/azure-devops.svg"
+        },
+        {
+            "name": "Airflow",
+            "file": "skills/airflow.svg"
+        },
+        {
+            "name": "NiFi",
+            "file": "skills/nifi.svg"
+        },
+        {
+            "name": "Metabase",
+            "file": "skills/metabase.svg"
+        },
+        {
+            "name": "Kong",
+            "file": "skills/kong.svg"
+        },
+        {
+            "name": "Keycloak",
+            "file": "skills/keycloak.svg"
+        },
+        {
+            "name": "Google Monitoring",
+            "file": "skills/google-monitoring.svg"
+        },
+        {
+            "name": "Nexus",
+            "file": "skills/nexus.svg"
+        },
+        {
+            "name": "GitLab CI",
+            "file": "skills/gitlab.svg"
+        },
+        {
+            "name": "Apache",
+            "file": "skills/apache.svg"
+        },
+        {
+            "name": "Splunk",
+            "file": "skills/splunk.svg"
         }
     ],
     "skills": {
@@ -152,9 +224,12 @@
         "DevOps": [
             "Jenkins",
             "GitLab CI/CD",
+            "Azure DevOps",
             "ArgoCD",
             "Terraform",
-            "Ansible"
+            "Ansible",
+            "Airflow",
+            "NiFi"
         ],
         "Containers": [
             "Docker",
@@ -164,10 +239,19 @@
             "GKE",
             "Helm"
         ],
+        "Data": [
+            "Elasticsearch",
+            "Kibana",
+            "MongoDB",
+            "PostgreSQL",
+            "Kafka",
+            "Debezium"
+        ],
         "Observability": [
             "Prometheus",
             "Grafana",
-            "GCP Monitoring"
+            "Google Monitoring",
+            "Splunk"
         ],
         "Systems": [
             "Linux (RHEL)",
@@ -175,11 +259,17 @@
             "Nginx",
             "Apache"
         ],
+        "Platform": [
+            "Kong",
+            "Keycloak",
+            "Metabase",
+            "Hugging Face",
+            "Nexus"
+        ],
         "Tooling": [
             "Git",
             "GitHub",
             "GitLab",
-            "Nexus",
             "SonarQube",
             "Bash",
             "Python"

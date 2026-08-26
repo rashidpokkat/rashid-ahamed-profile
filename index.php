@@ -34,7 +34,7 @@ include __DIR__ . '/includes/header.php';
                         </figcaption>
                     </figure>
                     <figure class="portrait-peek">
-        <img src="<?= e($config['photos']['peek'] ?? 'assets/images/peek.jpg') ?>" alt="Rashid Ahamed looking left, wearing a black mandarin-collar shirt with wavy embroidery" width="220" height="280">
+                        <img src="<?= e($config['photos']['peek'] ?? 'assets/images/peek.jpg') ?>" alt="Rashid Ahamed looking left, wearing a black mandarin-collar shirt with wavy embroidery" width="220" height="280">
                     </figure>
                     <span class="portrait-chip">operator / 01</span>
                 </div>
