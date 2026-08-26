@@ -51,7 +51,7 @@
         if (current === "stats" || current === "doing") {
             current = "about";
         } else if (current === "photos") {
-            current = "skills";
+            current = "github";
         }
         navLinks.forEach((link) => {
             const href = link.getAttribute("href") || "";

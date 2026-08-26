@@ -1,5 +1,10 @@
 <?php
 require __DIR__ . '/includes/init.php';
+require_once __DIR__ . '/includes/github.php';
+
+$githubUrl = (string) ($config['social']['github'] ?? '');
+$github = $githubUrl !== '' ? load_github_profile(github_username_from_url($githubUrl)) : null;
+
 include __DIR__ . '/includes/header.php';
 ?>
 <main id="main">
@@ -19,7 +24,7 @@ include __DIR__ . '/includes/header.php';
                     </ul>
                     <div class="portrait-back" aria-hidden="true"></div>
                     <figure class="portrait-main">
-                        <img src="assets/images/avatar.jpg" alt="Portrait of Rashid Ahamed" width="420" height="520" fetchpriority="high">
+                        <img src="<?= e($config['photos']['avatar'] ?? 'assets/images/avatar.jpg') ?>" alt="Professional headshot of Rashid Ahamed looking at the camera, wearing a taupe open-collar shirt" width="420" height="520" fetchpriority="high">
                         <span class="portrait-shine" aria-hidden="true"></span>
                         <span class="portrait-scan" aria-hidden="true"></span>
                         <span class="portrait-brackets" aria-hidden="true"></span>
@@ -29,7 +34,7 @@ include __DIR__ . '/includes/header.php';
                         </figcaption>
                     </figure>
                     <figure class="portrait-peek">
-                        <img src="assets/images/about.jpg" alt="" width="220" height="280">
+        <img src="<?= e($config['photos']['peek'] ?? 'assets/images/peek.jpg') ?>" alt="Rashid Ahamed looking left, wearing a black mandarin-collar shirt with wavy embroidery" width="220" height="280">
                     </figure>
                     <span class="portrait-chip">operator / 01</span>
                 </div>
@@ -50,6 +55,9 @@ include __DIR__ . '/includes/header.php';
                 </div>
                 <div class="socials" data-reveal>
                     <a href="<?= e($config['social']['linkedin']) ?>" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><?= icon('linkedin') ?></a>
+                    <?php if (!empty($config['social']['github'])): ?>
+                        <a href="<?= e($config['social']['github']) ?>" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><?= icon('github') ?></a>
+                    <?php endif; ?>
                     <a href="<?= e($config['social']['instagram']) ?>" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><?= icon('instagram') ?></a>
                     <a href="<?= e($config['social']['facebook']) ?>" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><?= icon('facebook') ?></a>
                     <a href="<?= e($config['social']['whatsapp']) ?>" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><?= icon('whatsapp') ?></a>
@@ -184,19 +192,96 @@ include __DIR__ . '/includes/header.php';
         <div class="container">
             <div class="section-head">
                 <p class="kicker" data-reveal>Beyond the terminal</p>
-                <h2 data-reveal>A few frames from the hills</h2>
+                <h2 data-reveal>A few portraits</h2>
             </div>
             <div class="photo-grid">
                 <figure data-reveal>
-                    <img src="assets/images/about.jpg" alt="Rashid Ahamed with arms open at a tea plantation" width="800" height="1100" loading="lazy">
+                    <img src="<?= e($config['photos']['about'] ?? 'assets/images/about.jpg') ?>" alt="Rashid Ahamed looking left, wearing a black mandarin-collar shirt with wavy light embroidery" width="800" height="1100" loading="lazy">
                 </figure>
                 <figure data-reveal>
-                    <img src="assets/images/portrait.jpg" alt="Rashid Ahamed against misty tea hills" width="720" height="960" loading="lazy">
+                    <img src="<?= e($config['photos']['portrait'] ?? 'assets/images/portrait.jpg') ?>" alt="Rashid Ahamed in profile wearing sunglasses and a black t-shirt" width="720" height="960" loading="lazy">
                 </figure>
                 <figure data-reveal>
-                    <img src="assets/images/gallery-1.jpg" alt="Rashid Ahamed looking across a foggy plantation" width="720" height="960" loading="lazy">
+                    <img src="<?= e($config['photos']['gallery_1'] ?? 'assets/images/gallery-1.jpg') ?>" alt="Rashid Ahamed looking at the camera in a taupe open-collar shirt" width="720" height="960" loading="lazy">
                 </figure>
             </div>
+        </div>
+    </section>
+
+    <section class="section" id="github">
+        <div class="container">
+            <div class="section-head github-head">
+                <div>
+                    <p class="kicker" data-reveal>GitHub</p>
+                    <h2 data-reveal>Open work on GitHub</h2>
+                </div>
+                <?php if ($githubUrl !== ''): ?>
+                    <a class="btn btn-ghost" href="<?= e($githubUrl) ?>" target="_blank" rel="noopener noreferrer" data-reveal><?= icon('github') ?> View profile</a>
+                <?php endif; ?>
+            </div>
+            <?php if ($github): ?>
+                <article class="card github-profile" data-reveal>
+                    <?php if (!empty($github['avatar_url'])): ?>
+                        <img class="github-avatar" src="<?= e($github['avatar_url']) ?>" alt="<?= e($github['name']) ?> on GitHub" width="72" height="72">
+                    <?php endif; ?>
+                    <div class="github-profile-copy">
+                        <p class="kicker">@<?= e($github['login']) ?></p>
+                        <h3><?= e($github['name']) ?></h3>
+                        <?php if (!empty($github['bio'])): ?>
+                            <p><?= e($github['bio']) ?></p>
+                        <?php endif; ?>
+                        <p class="muted">
+                            <?php
+                            $meta = array_filter([
+                                $github['company'] ?? '',
+                                $github['location'] ?? '',
+                                !empty($github['created_year']) ? 'since ' . $github['created_year'] : '',
+                            ]);
+                            echo e(implode(' · ', $meta));
+                            ?>
+                        </p>
+                    </div>
+                </article>
+                <div class="stats-grid github-stats">
+                    <article class="stat-card" data-reveal>
+                        <strong><?= e((string) $github['public_repos']) ?></strong>
+                        <span>Public repos</span>
+                    </article>
+                    <article class="stat-card" data-reveal>
+                        <strong><?= e((string) $github['followers']) ?></strong>
+                        <span>Followers</span>
+                    </article>
+                    <article class="stat-card" data-reveal>
+                        <strong><?= e((string) $github['following']) ?></strong>
+                        <span>Following</span>
+                    </article>
+                    <article class="stat-card" data-reveal>
+                        <strong><?= e((string) ($github['created_year'] ?: '—')) ?></strong>
+                        <span>On GitHub since</span>
+                    </article>
+                </div>
+                <?php if (!empty($github['repos'])): ?>
+                    <div class="github-repos">
+                        <?php foreach ($github['repos'] as $repo): ?>
+                            <a class="card github-repo" href="<?= e($repo['url']) ?>" target="_blank" rel="noopener noreferrer" data-reveal>
+                                <h3><?= e($repo['name']) ?></h3>
+                                <p><?= e($repo['description'] !== '' ? $repo['description'] : 'No description yet.') ?></p>
+                                <div class="github-repo-meta">
+                                    <?php if ($repo['language'] !== ''): ?>
+                                        <span><?= e($repo['language']) ?></span>
+                                    <?php endif; ?>
+                                    <span>★ <?= e((string) $repo['stars']) ?></span>
+                                </div>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            <?php elseif ($githubUrl !== ''): ?>
+                <article class="card github-fallback" data-reveal>
+                    <p>Live GitHub stats are unavailable right now. Open the profile to see repositories and activity.</p>
+                    <a class="btn btn-primary" href="<?= e($githubUrl) ?>" target="_blank" rel="noopener noreferrer"><?= icon('github') ?> github.com/<?= e(github_username_from_url($githubUrl)) ?></a>
+                </article>
+            <?php endif; ?>
         </div>
     </section>
 
@@ -223,6 +308,12 @@ include __DIR__ . '/includes/header.php';
                         <?= icon('linkedin') ?>
                         <div><strong>LinkedIn</strong><span>rashidpokkat</span></div>
                     </a>
+                    <?php if (!empty($config['social']['github'])): ?>
+                        <a class="card contact-card" href="<?= e($config['social']['github']) ?>" target="_blank" rel="noopener noreferrer" data-reveal>
+                            <?= icon('github') ?>
+                            <div><strong>GitHub</strong><span><?= e(github_username_from_url((string) $config['social']['github'])) ?></span></div>
+                        </a>
+                    <?php endif; ?>
                     <a class="card contact-card" href="<?= e($config['social']['instagram']) ?>" target="_blank" rel="noopener noreferrer" data-reveal>
                         <?= icon('instagram') ?>
                         <div><strong>Instagram</strong><span>@rashidahamed_</span></div>

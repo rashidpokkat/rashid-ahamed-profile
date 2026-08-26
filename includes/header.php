@@ -2,7 +2,7 @@
 /** @var array $config */
 $pageTitle = $pageTitle ?? ($config['name'] . ' — ' . $config['title']);
 $pageDescription = $pageDescription ?? $config['tagline'];
-$ogImage = $ogImage ?? 'assets/images/avatar.jpg';
+$ogImage = $ogImage ?? ($config['photos']['avatar'] ?? 'assets/images/avatar.jpg');
 $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')
     . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost')
     . rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/\\');
@@ -50,11 +50,12 @@ $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : '
             'addressCountry' => 'IN',
         ],
         'url' => $baseUrl,
-        'sameAs' => [
-            $config['social']['linkedin'],
-            $config['social']['instagram'],
-            $config['social']['facebook'],
-        ],
+        'sameAs' => array_values(array_filter([
+            $config['social']['linkedin'] ?? '',
+            $config['social']['github'] ?? '',
+            $config['social']['instagram'] ?? '',
+            $config['social']['facebook'] ?? '',
+        ])),
     ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) ?>
     </script>
 </head>
@@ -74,6 +75,7 @@ $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : '
                 <a href="#about">About</a>
                 <a href="#work">Work</a>
                 <a href="#skills">Skills</a>
+                <a href="#github">GitHub</a>
                 <a href="#contact">Contact</a>
             </nav>
             <div class="header-actions">

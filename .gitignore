@@ -4,3 +4,5 @@ Thumbs.db
 .idea/
 .vscode/
 .pydeps/
+data/admin.json
+data/github-cache.json
