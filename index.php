@@ -1,5 +1,7 @@
 <?php
 require __DIR__ . '/includes/init.php';
+require_once __DIR__ . '/includes/visitors.php';
+track_public_visit();
 require_once __DIR__ . '/includes/github.php';
 
 $githubUrl = (string) ($config['social']['github'] ?? '');

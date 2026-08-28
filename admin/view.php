@@ -11,6 +11,7 @@
 /** @var string $adminUser */
 /** @var array $inbox */
 /** @var int $unreadCount */
+/** @var array $traffic */
 
 $focusIcons = [
     'cloud' => 'Cloud',
@@ -116,6 +117,7 @@ $socialFields = [
             <nav aria-label="Sections">
                 <a href="#overview" class="is-active"><?= icon('home') ?> Overview</a>
                 <a href="#messages"><?= icon('chat') ?> Messages<?php if ($unreadCount > 0): ?> <span class="nav-badge"><?= (int) $unreadCount ?></span><?php endif; ?></a>
+                <a href="#visitors"><?= icon('pin') ?> Visitors</a>
                 <a href="#profile"><?= icon('user') ?> Profile</a>
                 <a href="#social"><?= icon('link') ?> Social</a>
                 <a href="#photos"><?= icon('image') ?> Photos</a>
@@ -157,6 +159,7 @@ $socialFields = [
                         <article class="stat-chip"><strong><?= $jobCount ?></strong><span>Experience roles</span></article>
                         <article class="stat-chip"><strong><?= $skillCount ?></strong><span>Skill groups</span></article>
                         <article class="stat-chip"><strong><?= count($inbox) ?></strong><span><?= $unreadCount > 0 ? $unreadCount . ' unread' : 'Messages' ?></span></article>
+                        <article class="stat-chip"><strong><?= (int) ($traffic['today_unique'] ?? 0) ?></strong><span>Visitors today</span></article>
                     </div>
                 </section>
 
@@ -217,6 +220,117 @@ $socialFields = [
                                     </div>
                                 </article>
                             <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </section>
+
+                <section class="section visitors-section" id="visitors">
+                    <div class="section-head">
+                        <div class="section-copy">
+                            <p class="kicker">Traffic</p>
+                            <h2>Visitors</h2>
+                            <p>Counts, region, and IP for public-site visits. Only you can see this log.</p>
+                        </div>
+                        <?php if (($traffic['visits'] ?? []) !== [] || (int) ($traffic['views'] ?? 0) > 0): ?>
+                            <form method="post" onsubmit="return confirm('Clear the visitor log?');">
+                                <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
+                                <input type="hidden" name="action" value="visitors_clear">
+                                <button class="btn btn-danger btn-sm" type="submit"><?= icon('trash') ?> Clear log</button>
+                            </form>
+                        <?php endif; ?>
+                    </div>
+                    <div class="traffic-chips">
+                        <article class="stat-chip"><strong><?= (int) $traffic['today_unique'] ?></strong><span>Unique today</span></article>
+                        <article class="stat-chip"><strong><?= (int) $traffic['today_views'] ?></strong><span>Views today</span></article>
+                        <article class="stat-chip"><strong><?= (int) $traffic['week_unique'] ?></strong><span>Unique · 7 days</span></article>
+                        <article class="stat-chip"><strong><?= (int) $traffic['unique'] ?></strong><span>Unique all time</span></article>
+                    </div>
+                    <?php
+                        $countryMax = 0;
+                        foreach ($traffic['countries'] as $row) {
+                            $countryMax = max($countryMax, (int) ($row['count'] ?? 0));
+                        }
+                    ?>
+                    <?php if ($traffic['countries'] !== [] || $traffic['regions'] !== []): ?>
+                        <div class="traffic-split">
+                            <?php if ($traffic['countries'] !== []): ?>
+                                <div>
+                                    <p class="kicker">Countries</p>
+                                    <ul class="region-list">
+                                        <?php foreach ($traffic['countries'] as $row): ?>
+                                            <?php $pct = $countryMax > 0 ? (int) round(((int) $row['count'] / $countryMax) * 100) : 0; ?>
+                                            <li>
+                                                <div class="region-meta">
+                                                    <strong><?= e((string) $row['label']) ?></strong>
+                                                    <span><?= (int) $row['count'] ?></span>
+                                                </div>
+                                                <span class="region-bar" style="width: <?= $pct ?>%"></span>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </div>
+                            <?php endif; ?>
+                            <?php if ($traffic['regions'] !== []): ?>
+                                <div>
+                                    <p class="kicker">Regions</p>
+                                    <ul class="region-list">
+                                        <?php foreach ($traffic['regions'] as $row): ?>
+                                            <li>
+                                                <div class="region-meta">
+                                                    <strong><?= e((string) $row['label']) ?></strong>
+                                                    <span><?= (int) $row['count'] ?></span>
+                                                </div>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($traffic['visits'] === []): ?>
+                        <article class="inbox-empty">
+                            <p>No public visits recorded yet. Open the live site in a private window to see the first entry.</p>
+                        </article>
+                    <?php else: ?>
+                        <div class="visit-table-wrap">
+                            <table class="visit-table">
+                                <thead>
+                                    <tr>
+                                        <th>When</th>
+                                        <th>Visitor</th>
+                                        <th>Region</th>
+                                        <th>IP</th>
+                                        <th>Device</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($traffic['visits'] as $visit): ?>
+                                        <?php
+                                            if (!is_array($visit)) {
+                                                continue;
+                                            }
+                                            $when = (string) ($visit['at'] ?? '');
+                                            $stamp = $when !== '' ? strtotime($when) : false;
+                                            $whenLabel = $stamp ? date('j M · g:ia', $stamp) : $when;
+                                            $place = visitor_place($visit);
+                                            $ref = (string) ($visit['referrer'] ?? '');
+                                            $refHost = $ref !== '' ? (string) (parse_url($ref, PHP_URL_HOST) ?? $ref) : '';
+                                        ?>
+                                        <tr>
+                                            <td><?= e($whenLabel) ?></td>
+                                            <td>
+                                                <?= e(((string) ($visit['city'] ?? '') !== '') ? (string) $visit['city'] : ((string) ($visit['country'] ?? '') !== '' ? (string) $visit['country'] : 'Visitor')) ?>
+                                                <?php if ($refHost !== ''): ?>
+                                                    <span class="muted">via <?= e($refHost) ?></span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td><?= e($place) ?></td>
+                                            <td><code><?= e((string) ($visit['ip'] ?? '')) ?></code></td>
+                                            <td><?= e((string) ($visit['device'] ?? 'Desktop')) ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
                         </div>
                     <?php endif; ?>
                 </section>

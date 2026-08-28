@@ -133,6 +133,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             : 'Could not update that message.';
         header('Location: index.php#messages');
         exit;
+    } elseif ($loggedIn && ($_POST['action'] ?? '') === 'visitors_clear') {
+        require_once dirname(__DIR__) . '/includes/visitors.php';
+        $_SESSION['admin_flash'] = clear_visitor_stats()
+            ? 'Visitor log cleared.'
+            : 'Could not clear the visitor log.';
+        header('Location: index.php#visitors');
+        exit;
     } elseif ($loggedIn && ($_POST['action'] ?? '') === 'save') {
         $phone = trim((string) ($_POST['phone'] ?? ''));
         $digits = digits_only($phone);
@@ -290,6 +297,18 @@ $skillCount = count($c['skills'] ?? []);
 $certCount = count($c['certifications'] ?? []);
 $adminUser = (string) ($_SESSION['admin_user'] ?? 'admin');
 require_once dirname(__DIR__) . '/includes/messages.php';
+require_once dirname(__DIR__) . '/includes/visitors.php';
 $inbox = $loggedIn ? load_messages() : [];
 $unreadCount = unread_message_count($inbox);
+$traffic = $loggedIn ? load_visitor_stats() : [
+    'views' => 0,
+    'unique' => 0,
+    'today_views' => 0,
+    'today_unique' => 0,
+    'week_views' => 0,
+    'week_unique' => 0,
+    'countries' => [],
+    'regions' => [],
+    'visits' => [],
+];
 include __DIR__ . '/view.php';
